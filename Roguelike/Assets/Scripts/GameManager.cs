@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,9 +8,13 @@ public class GameManager : MonoBehaviour {
 	public static GameManager instance = null;
 	public float turnDelay = 0.1f;
 	public int playerFoodPoints = 100;
+	public float levelStartDelay = 1f;
 	[HideInInspector]public bool playerTurn = true;
+	private GameObject levelImage;
+	private bool doingSetup = true;
+	private Text levelText;
 	private bool enemyMoving;
-	private int level=3;
+	private int level=1;
 	private List<Enemy> enemys;
 	private BoarderManager boarderManager;
 
@@ -21,6 +26,7 @@ public class GameManager : MonoBehaviour {
 		{
 			Destroy(gameObject);
 		}
+
 		DontDestroyOnLoad (gameObject);
 		boarderManager = GetComponent<BoarderManager> ();
 		enemys = new List<Enemy>();
@@ -29,17 +35,35 @@ public class GameManager : MonoBehaviour {
 
 	void InitGame()
 	{
+		levelImage = GameObject.Find ("LevelImage");
+		levelText = GameObject.Find ("LevelText").GetComponent<Text> ();
+		doingSetup = true;
+		levelText.text = "Day " + level;
+		levelImage.SetActive (true);
+		Invoke ("HideLevelImage", levelStartDelay);
 		enemys.Clear ();
 		boarderManager.SetupScene (level);
 	}
 
+	void HideLevelImage()
+	{
+		levelImage.SetActive (false);
+		doingSetup = false;
+	}
+
 	void Update()
 	{
-		if (playerTurn || enemyMoving) {
+		if (playerTurn || enemyMoving || doingSetup) {
 			return;
 		}
 			
 		StartCoroutine (MoveEnemies ());
+	}
+
+	void OnLevelWasLoaded()
+	{
+		level++;
+		InitGame ();
 	}
 
 	IEnumerator MoveEnemies()
@@ -66,6 +90,8 @@ public class GameManager : MonoBehaviour {
 
 	public void GameOver()
 	{
+		levelText.text = "After " + level + " days, you starved.";
+		levelImage.SetActive(true);
 		enabled = false;
 	}
 }

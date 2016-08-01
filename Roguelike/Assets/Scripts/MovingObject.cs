@@ -21,7 +21,7 @@ public abstract class  MovingObject : MonoBehaviour {
 		Vector2 start = transform.position;
 		Vector2 end = start + new Vector2 (xDir, yDir);
 		boxCollider.enabled = false;
-		hit = Physics2D.Linecast (start, end);
+		hit = Physics2D.Linecast (start, end,blockingLayer);
 		boxCollider.enabled = true;
 		if (hit.transform == null) {
 			StartCoroutine (SmoothMovement (end));
